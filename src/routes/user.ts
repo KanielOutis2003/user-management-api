@@ -57,6 +57,23 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// List all users
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+    return res.status(200).json({
+      success: true,
+      data: usersWithoutPasswords
+    });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 // Delete a user by ID
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
