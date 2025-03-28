@@ -57,4 +57,21 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
+// List all users
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const userList = users.map(({ password, ...userWithoutPassword }) => userWithoutPassword);
+    return res.status(200).json({
+      success: true,
+      data: userList
+    });
+  } catch (error) {
+    console.error('Error listing users:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
 export default router;
