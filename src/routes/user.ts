@@ -8,7 +8,7 @@ const router = Router();
 const users: User[] = [];
 
 // Create a new user
-router.post('/', (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
     const { username, email, password } = req.body;
     
