@@ -1,34 +1,60 @@
-// POST create new user
-router.post('/', 
-    [
-      body('name').isString().notEmpty().withMessage('Name is required'),
-      body('email').isEmail().withMessage('Valid email is required'),
-      body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
-    ],
-    async (req: Request, res: Response): Promise<void> => {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        res.status(400).json({ 
-          success: false, 
-          errors: errors.array() 
-        });
-        return;
-      }
-  
-      try {
-        // This would normally create a user in a database
-        // For now, we'll return a placeholder response
-        res.status(201).json({ 
-          success: true, 
-          message: 'User created successfully',
-          data: req.body 
-        });
-      } catch (error: any) {
-        res.status(500).json({ 
-          success: false, 
-          message: 'Failed to create user', 
-          error: error.message 
-        });
-      }
+import { Router, Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
+import { User } from '../entities/User';
+
+const router = Router();
+
+// In-memory storage for users (in a real app, this would be a database)
+const users: User[] = [];
+
+// Create a new user
+router.post('/', (req: Request, res: Response) => {
+  try {
+    const { username, email, password } = req.body;
+    
+    // Basic validation
+    if (!username || !email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Username, email and password are required' 
+      });
     }
-  );
+    
+    // Check if user with the same email already exists
+    const userExists = users.some(user => user.email === email);
+    if (userExists) {
+      return res.status(409).json({ 
+        success: false, 
+        message: 'User with this email already exists' 
+      });
+    }
+    
+    // Create new user
+    const newUser: User = {
+      id: uuidv4(),
+      username,
+      email,
+      password, // Note: In a real app, this should be hashed
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    
+    // Save user
+    users.push(newUser);
+    
+    // Return success without exposing password
+    const { password: _, ...userWithoutPassword } = newUser;
+    return res.status(201).json({
+      success: true,
+      data: userWithoutPassword
+    });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+});
+
+export default router;

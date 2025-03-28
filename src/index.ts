@@ -1,8 +1,8 @@
-import express, { Request, Response } from 'express';
-// Using require since we can't install @types/cors
-const cors = require('cors');
+import express from 'express';
+import cors from 'cors';
 import userRoutes from './routes/user';
 
+// Initialize express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -10,11 +10,11 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Register routes
 app.use('/api/users', userRoutes);
 
 // Health check route
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
